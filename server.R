@@ -33,14 +33,15 @@ shinyServer(function(input, output) {
     tmp <- filter(tenders, pkAtmMain == input$pkAtmMain)
     idlist <- unique(tmp[["廠商代碼"]])
     idlist <- paste(idlist, collapse=",")
-    tmp.path <- tempfile(fileext = ".csv.gz")
+    tmp.path <- tempfile(fileext = ".csv")
     out.path <- tempfile(fileext = ".csv")
     tryCatch({
       src <- srclist[[input$graph]]
       threshold <- quantile(src$weight, input$threshold / 100, na.rm = TRUE)
       filter(src, weight >= threshold) %>%
         select(n1, n2) %>%
-        write.table(gzfile(tmp.path), row.names = FALSE, col.names = FALSE, sep = "\t")
+        write.table(tmp.path, row.names = FALSE, col.names = FALSE, sep = "\t", quote = FALSE)
+#       system(sprintf("python/debug.py %s %s %s", tmp.path, idlist, out.path))  
       min_len <- system(sprintf("python/query.py %s %s %s", tmp.path, idlist, out.path), intern = TRUE)  
       list(min_len = as.numeric(min_len), subgraph = {
         readLines(out.path) %>%
@@ -76,7 +77,7 @@ shinyServer(function(input, output) {
   
   output$neighborPlot <- renderPlot({
     result <- query()
-    browser()
+#     browser()
     if (length(result$subgraph) == 0) {
       
     } else {
