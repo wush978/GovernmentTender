@@ -23,6 +23,8 @@ for i in range(len(query)-1):
         try:
             path = nx.shortest_path(G, u, v)
             setSubNodes |= set(path)
+            for node in path:
+                setSubNodes |= nx.neighbors(G, node)
             if len(path) < min_len:
                 min_len = len(path)
         except:
